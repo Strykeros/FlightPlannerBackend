@@ -1,9 +1,12 @@
-﻿namespace FlightPlannerBackend
+﻿using System.Text.Json.Serialization;
+
+namespace FlightPlannerBackend
 {
     public class Airport
     {
         public string Country { get; set; }
         public string City { get; set; }
+        [JsonPropertyName("airport")]
         public string AirportName { get; set; } 
     }
 }

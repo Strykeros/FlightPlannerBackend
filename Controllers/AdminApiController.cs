@@ -21,7 +21,7 @@ namespace FlightPlannerBackend.Controllers
     [ApiController]
     public class AdminApiController : ControllerBase
     {
-        private string _flightData;
+        private FlightStorage _flightStorage = new FlightStorage();
 
         [Route("flights/{id}")]
         [HttpGet]
@@ -30,42 +30,26 @@ namespace FlightPlannerBackend.Controllers
             return NotFound();
         }
 
-        [Route("flights/")]
+        [Route("flights")]
         [HttpPut]
-        public IActionResult AddFlight([FromBody] Flight flight)
+        public IActionResult PutFlight([FromBody] Flight flight)
         {
-            if (flight == null)
+            int flightAdded = _flightStorage.AddFlight(flight);
+
+            if (flightAdded == 201)
             {
-                return BadRequest("Invalid JSON data");
+                return Created("flight added", _flightStorage.GetFlight(flight.Id)); 
+            }
+            else if (flightAdded == 409)
+            {
+                return Conflict();
+            }
+            else if (flightAdded == 400)
+            {
+                return BadRequest();
             }
 
-            /*_flightData = "{" +
-                $"\"From airport\": \"{flight.From}\"," +
-                $"\"To airport\": \"{flight.To}\"," +
-                $"\"Carrier\": \"{flight.Carrier}\"," +
-                $"\"Departure time\": \"{flight.DepartureTime}\"," +
-                $"\"Arrival time\": \"{flight.ArrivalTime}\"," +
-             "}";*/
-
-            _flightData = $@"{{
-                ""from"": {{
-                    ""country"": ""{flight.From.Country}"",
-                    ""city"": ""{flight.From.City}"",
-                    ""airportName"": ""{flight.From.AirportName}""
-                }},
-                ""to"": {{
-                    ""country"": ""{flight.To.Country}"",
-                    ""city"": ""{flight.To.City}"",
-                    ""airportName"": ""{flight.To.AirportName}""
-                }},
-                ""carrier"": ""{flight.Carrier}"",
-                ""departureTime"": ""{flight.DepartureTime}"",
-                ""arrivalTime"": ""{flight.ArrivalTime}""
-            }}";
-
-            var serializedData = JsonConvert.SerializeObject(_flightData);
-
-            return Ok(serializedData);
+            return Ok();
         }
     }
 }
