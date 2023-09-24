@@ -30,7 +30,7 @@ namespace FlightPlannerBackend.Controllers
             return NotFound();
         }
 
-        [Route("flights")]
+        [Route("flights/")]
         [HttpPut]
         public IActionResult AddFlight([FromBody] Flight flight)
         {
@@ -39,13 +39,29 @@ namespace FlightPlannerBackend.Controllers
                 return BadRequest("Invalid JSON data");
             }
 
-            _flightData = "{" +
+            /*_flightData = "{" +
                 $"\"From airport\": \"{flight.From}\"," +
                 $"\"To airport\": \"{flight.To}\"," +
                 $"\"Carrier\": \"{flight.Carrier}\"," +
                 $"\"Departure time\": \"{flight.DepartureTime}\"," +
                 $"\"Arrival time\": \"{flight.ArrivalTime}\"," +
-             "}";
+             "}";*/
+
+            _flightData = $@"{{
+                ""from"": {{
+                    ""country"": ""{flight.From.Country}"",
+                    ""city"": ""{flight.From.City}"",
+                    ""airportName"": ""{flight.From.AirportName}""
+                }},
+                ""to"": {{
+                    ""country"": ""{flight.To.Country}"",
+                    ""city"": ""{flight.To.City}"",
+                    ""airportName"": ""{flight.To.AirportName}""
+                }},
+                ""carrier"": ""{flight.Carrier}"",
+                ""departureTime"": ""{flight.DepartureTime}"",
+                ""arrivalTime"": ""{flight.ArrivalTime}""
+            }}";
 
             var serializedData = JsonConvert.SerializeObject(_flightData);
 
