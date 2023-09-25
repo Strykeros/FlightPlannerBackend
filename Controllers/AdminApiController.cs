@@ -51,5 +51,13 @@ namespace FlightPlannerBackend.Controllers
 
             return Ok();
         }
+
+        [Route("flights/{id}")]
+        [HttpDelete]
+        public IActionResult DeleteFlights(int id)
+        {
+            _flightStorage.DeleteFlight(id);
+            return Ok();
+        }
     }
 }

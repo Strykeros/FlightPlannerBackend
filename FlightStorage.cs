@@ -68,5 +68,11 @@
         {
             _flights.Clear();
         }
+
+        public void DeleteFlight(int id)
+        {
+            var flight = _flights.FirstOrDefault(f => f.Id == id);
+            _flights.Remove(flight);
+        }
     }
 }
