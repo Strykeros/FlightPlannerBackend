@@ -43,29 +43,11 @@ namespace FlightPlannerBackend.Controllers
                 return BadRequest();
             }
 
-            /*if (!_flightStorage.ContainsTime(inputFlight.DepartureDate))
-            {
-                foreach (var flight in flights)
-                {
-                    DateTime departureDateTime;
-                    if (DateTime.TryParse(flight.DepartureTime, out departureDateTime))
-                    {
-                        //flight.DepartureTime = departureDateTime.ToString("yyyy-MM-dd");
-                    }
-                }
-            }*/
-
             var filteredFlights = flights.Where(
                 flight => flight.From.AirportName == inputFlight.From &&
                 flight.To.AirportName == inputFlight.To &&
                 flight.DepartureTime.Contains(inputFlight.DepartureDate)
                 ).ToList();
-
-            /*if(filteredFlights == null)
-            {
-                string empty = @"{ ""items"": [], ""page"": 0, ""totalItems"": 0}";
-                return Ok(empty);
-            }*/
 
             int totalItems = filteredFlights.Count;
 

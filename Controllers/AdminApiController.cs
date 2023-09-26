@@ -53,22 +53,6 @@ namespace FlightPlannerBackend.Controllers
                 }
 
                 return Ok(); 
-
-                /*try
-                {
-                    _flightStorage.AddFlight(flight);
-
-                }
-                catch (BadFlightRequestException)
-                {
-                    return BadRequest();
-                }
-                catch (FlightConflictException)
-                {
-                    return Conflict();
-                }
-
-                return Created("", flight);*/
             }
 
         }
@@ -77,8 +61,11 @@ namespace FlightPlannerBackend.Controllers
         [HttpDelete]
         public IActionResult DeleteFlights(int id)
         {
-            _flightStorage.DeleteFlight(id);
-            return Ok();
+            lock (_lockObject)
+            {
+                _flightStorage.DeleteFlight(id);
+                return Ok(id);
+            }
         }
     }
 }
