@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.Contracts;
 
-namespace FlightPlannerBackend
+namespace FlightPlannerBackend.Logic
 {
     public class FlightStorage
     {
@@ -17,14 +17,14 @@ namespace FlightPlannerBackend
             bool flightIsNull = string.IsNullOrEmpty(flight.ArrivalTime) ||
                                 string.IsNullOrEmpty(flight.DepartureTime) ||
                                 string.IsNullOrEmpty(flight.Carrier) ||
-                                (flight.From == null ||
+                                flight.From == null ||
                                  string.IsNullOrEmpty(flight.From.Country) ||
                                  string.IsNullOrEmpty(flight.From.City) ||
-                                 string.IsNullOrEmpty(flight.From.AirportName)) ||
-                                (flight.To == null ||
+                                 string.IsNullOrEmpty(flight.From.AirportName) ||
+                                flight.To == null ||
                                  string.IsNullOrEmpty(flight.To.Country) ||
                                  string.IsNullOrEmpty(flight.To.City) ||
-                                 string.IsNullOrEmpty(flight.To.AirportName));
+                                 string.IsNullOrEmpty(flight.To.AirportName);
 
             bool flightExists = _flights.Exists(existingFlight =>
                 existingFlight.From.AirportName == flight.From.AirportName &&
@@ -51,10 +51,10 @@ namespace FlightPlannerBackend
             {
                 return 409;
             }
-        
+
             flight.Id = _id++;
             _flights.Add(flight);
-            return 201; 
+            return 201;
         }
 
         public Flight GetFlight(int id)
@@ -76,6 +76,21 @@ namespace FlightPlannerBackend
         {
             var flight = _flights.FirstOrDefault(f => f.Id == id);
             _flights.Remove(flight);
+        }
+
+        public Flight SearchAirport(string search)
+        {
+            var foundAirports = GetAllFlights()
+            .FirstOrDefault(airport =>
+                airport.From.AirportName.ToLower().Contains(search.ToLower().Trim()) ||
+                airport.From.City.ToLower().Contains(search.ToLower().Trim()) ||
+                airport.From.Country.ToLower().Contains(search.ToLower().Trim()) ||
+                airport.To.AirportName.ToLower().Contains(search.ToLower().Trim()) ||
+                airport.To.City.ToLower().Contains(search.ToLower().Trim()) ||
+                airport.To.Country.ToLower().Contains(search.ToLower().Trim())
+            );
+
+            return foundAirports;
         }
     }
 }

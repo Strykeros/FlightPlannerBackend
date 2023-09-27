@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using FlightPlannerBackend.Logic;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlannerBackend.Controllers
 {
     [Route("testing-api")]
     [ApiController]
-    public class TestingController : ControllerBase
+    public class CleanupApiController : ControllerBase
     {
         private FlightStorage _flightStorage = new FlightStorage();
         [Route("clear")]

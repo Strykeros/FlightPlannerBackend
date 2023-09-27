@@ -1,4 +1,4 @@
-﻿namespace FlightPlannerBackend
+﻿namespace FlightPlannerBackend.Logic
 {
     public class Flight
     {

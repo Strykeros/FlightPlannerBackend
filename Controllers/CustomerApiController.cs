@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FlightPlannerBackend.Logic;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FlightPlannerBackend.Controllers
 {
@@ -7,20 +8,14 @@ namespace FlightPlannerBackend.Controllers
     public class CustomerApiController : ControllerBase
     {
         FlightStorage _flightStorage = new FlightStorage();
+        FlightResponse _flightResponse = new FlightResponse();
+        SearchFlight _searchFlight = new SearchFlight();
 
         [Route("airports")]
         [HttpGet]
         public IActionResult SearchAirports([FromQuery] string search)
         {
-            var filteredAirports = _flightStorage.GetAllFlights()
-            .FirstOrDefault(airport =>
-                airport.From.AirportName.ToLower().Contains(search.ToLower().Trim()) ||
-                airport.From.City.ToLower().Contains(search.ToLower().Trim()) ||
-                airport.From.Country.ToLower().Contains(search.ToLower().Trim()) ||
-                airport.To.AirportName.ToLower().Contains(search.ToLower().Trim()) ||
-                airport.To.City.ToLower().Contains(search.ToLower().Trim()) ||
-                airport.To.Country.ToLower().Contains(search.ToLower().Trim())
-            );
+            var filteredAirports = _flightStorage.SearchAirport(search);
 
             if (filteredAirports != null)
             {
@@ -37,26 +32,12 @@ namespace FlightPlannerBackend.Controllers
         [HttpPost]
         public IActionResult SearchFlights(SearchFlight inputFlight)
         {
-            var flights = _flightStorage.GetAllFlights();
             if (inputFlight.From == inputFlight.To)
             {
                 return BadRequest();
             }
 
-            var filteredFlights = flights.Where(
-                flight => flight.From.AirportName == inputFlight.From &&
-                flight.To.AirportName == inputFlight.To &&
-                flight.DepartureTime.Contains(inputFlight.DepartureDate)
-                ).ToList();
-
-            int totalItems = filteredFlights.Count;
-
-            var response = new
-            {
-                items = filteredFlights,
-                page = 0,
-                totalItems = totalItems
-            };
+            var response = _searchFlight.GetFlight(inputFlight, _flightStorage);
 
             return Ok(response);
         }

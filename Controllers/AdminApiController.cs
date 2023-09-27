@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FlightPlannerBackend.Logic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,17 @@ namespace FlightPlannerBackend.Controllers
         [HttpGet]
         public IActionResult GetFlights(int id)
         {
-            return NotFound();
+            lock (_lockObject)
+            { 
+                var flight = _flightStorage.GetFlight(id);
+
+                if (flight == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(flight);            
+            }
         }
 
         [Route("flights")]
