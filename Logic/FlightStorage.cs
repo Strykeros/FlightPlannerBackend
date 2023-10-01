@@ -1,11 +1,15 @@
-﻿using System.Diagnostics.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlannerBackend.Logic
 {
     public class FlightStorage
     {
-        private static List<Flight> _flights = new List<Flight>();
-        private static int _id = 1;
+        private readonly FlightPlannerDbContext _context;
+
+        public FlightStorage(FlightPlannerDbContext context)
+        {
+            _context = context;
+        }
 
         public int AddFlight(Flight flight)
         {
@@ -26,7 +30,7 @@ namespace FlightPlannerBackend.Logic
                                  string.IsNullOrEmpty(flight.To.City) ||
                                  string.IsNullOrEmpty(flight.To.AirportName);
 
-            bool flightExists = _flights.Exists(existingFlight =>
+            bool flightExists = _context.Flights.Any(existingFlight =>
                 existingFlight.From.AirportName == flight.From.AirportName &&
                 existingFlight.From.City == flight.From.City &&
                 existingFlight.From.Country == flight.From.Country &&
@@ -38,7 +42,6 @@ namespace FlightPlannerBackend.Logic
                 existingFlight.ArrivalTime == flight.ArrivalTime &&
                 existingFlight.To.AirportName == flight.To.AirportName
             );
-
 
             bool dateMismatch = DateTime.Parse(flight.ArrivalTime) <= DateTime.Parse(flight.DepartureTime);
 
@@ -52,30 +55,39 @@ namespace FlightPlannerBackend.Logic
                 return 409;
             }
 
-            flight.Id = _id++;
-            _flights.Add(flight);
+            _context.Flights.Add(flight);
+            _context.SaveChanges();
             return 201;
         }
 
         public Flight GetFlight(int id)
         {
-            return _flights.FirstOrDefault(f => f.Id == id);
+            return _context.Flights.Include(f => f.From).Include(f => f.To).SingleOrDefault(f => f.Id == id);
         }
 
         public List<Flight> GetAllFlights()
         {
-            return _flights;
+            return _context.Flights.Include(f => f.From).Include(f => f.To).ToList();
         }
 
         public void ClearFlights()
         {
-            _flights.Clear();
+            if(_context.Flights.Any())
+            {
+                _context.Flights.RemoveRange(_context.Flights);
+                _context.SaveChanges();
+            }
         }
 
         public void DeleteFlight(int id)
         {
-            var flight = _flights.FirstOrDefault(f => f.Id == id);
-            _flights.Remove(flight);
+            var flight = _context.Flights.Include(f => f.From).Include(f => f.To).SingleOrDefault(f => f.Id == id);
+
+            if(flight != null)
+            {
+                _context.Flights.Remove(flight);
+                _context.SaveChanges();
+            }
         }
 
         public Flight SearchAirport(string search)

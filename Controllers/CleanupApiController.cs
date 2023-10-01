@@ -8,7 +8,14 @@ namespace FlightPlannerBackend.Controllers
     [ApiController]
     public class CleanupApiController : ControllerBase
     {
-        private FlightStorage _flightStorage = new FlightStorage();
+        private FlightStorage _flightStorage;
+
+        public CleanupApiController(FlightPlannerDbContext context)
+        {
+            _flightStorage = new FlightStorage(context);
+        }
+
+
         [Route("clear")]
         [HttpPost]
         public IActionResult ClearFlights()

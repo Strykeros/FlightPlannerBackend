@@ -7,9 +7,13 @@ namespace FlightPlannerBackend.Controllers
     [ApiController]
     public class CustomerApiController : ControllerBase
     {
-        FlightStorage _flightStorage = new FlightStorage();
-        FlightResponse _flightResponse = new FlightResponse();
+        FlightStorage _flightStorage;
         SearchFlight _searchFlight = new SearchFlight();
+
+        public CustomerApiController(FlightPlannerDbContext context)
+        {
+            _flightStorage = new FlightStorage(context);
+        }
 
         [Route("airports")]
         [HttpGet]

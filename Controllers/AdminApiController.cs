@@ -1,19 +1,6 @@
 ﻿using FlightPlannerBackend.Logic;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net;
-using System.Reflection.Metadata;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 
 namespace FlightPlannerBackend.Controllers
 {
@@ -22,8 +9,15 @@ namespace FlightPlannerBackend.Controllers
     [ApiController]
     public class AdminApiController : ControllerBase
     {
-        private FlightStorage _flightStorage = new FlightStorage();
+        private FlightStorage _flightStorage;
         private static readonly object _lockObject = new object();
+        private readonly FlightPlannerDbContext _context;
+
+        public AdminApiController(FlightPlannerDbContext context)
+        {
+            _context = context;
+            _flightStorage = new FlightStorage(context);
+        }
 
         [Route("flights/{id}")]
         [HttpGet]
@@ -63,7 +57,7 @@ namespace FlightPlannerBackend.Controllers
                     return BadRequest();
                 }
 
-                return Ok(); 
+                return Ok(flightAdded); 
             }
 
         }
