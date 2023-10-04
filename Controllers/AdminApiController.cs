@@ -1,18 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using FlightPlannerBackend.Logic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Net;
-using System.Reflection.Metadata;
-using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 
 namespace FlightPlannerBackend.Controllers
 {
@@ -21,51 +9,68 @@ namespace FlightPlannerBackend.Controllers
     [ApiController]
     public class AdminApiController : ControllerBase
     {
-        private string _flightData;
+        private FlightStorage _flightStorage;
+        private static readonly object _lockObject = new object();
+        private readonly FlightPlannerDbContext _context;
+
+        public AdminApiController(FlightPlannerDbContext context)
+        {
+            _context = context;
+            _flightStorage = new FlightStorage(context);
+        }
 
         [Route("flights/{id}")]
         [HttpGet]
         public IActionResult GetFlights(int id)
         {
-            return NotFound();
+            lock (_lockObject)
+            { 
+                var flight = _flightStorage.GetFlight(id);
+
+                if (flight == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(flight);            
+            }
         }
 
-        [Route("flights/")]
+        [Route("flights")]
         [HttpPut]
-        public IActionResult AddFlight([FromBody] Flight flight)
+        public IActionResult PutFlight(Flight flight)
         {
-            if (flight == null)
+            lock (_lockObject)
             {
-                return BadRequest("Invalid JSON data");
+                int flightAdded = _flightStorage.AddFlight(flight);
+
+                if (flightAdded == 201)
+                {
+                    return Created("flight added", _flightStorage.GetFlight(flight.Id)); 
+                }
+                else if (flightAdded == 409)
+                {
+                    return Conflict();
+                }
+                else if (flightAdded == 400)
+                {
+                    return BadRequest();
+                }
+
+                return Ok(flightAdded); 
             }
 
-            /*_flightData = "{" +
-                $"\"From airport\": \"{flight.From}\"," +
-                $"\"To airport\": \"{flight.To}\"," +
-                $"\"Carrier\": \"{flight.Carrier}\"," +
-                $"\"Departure time\": \"{flight.DepartureTime}\"," +
-                $"\"Arrival time\": \"{flight.ArrivalTime}\"," +
-             "}";*/
+        }
 
-            _flightData = $@"{{
-                ""from"": {{
-                    ""country"": ""{flight.From.Country}"",
-                    ""city"": ""{flight.From.City}"",
-                    ""airportName"": ""{flight.From.AirportName}""
-                }},
-                ""to"": {{
-                    ""country"": ""{flight.To.Country}"",
-                    ""city"": ""{flight.To.City}"",
-                    ""airportName"": ""{flight.To.AirportName}""
-                }},
-                ""carrier"": ""{flight.Carrier}"",
-                ""departureTime"": ""{flight.DepartureTime}"",
-                ""arrivalTime"": ""{flight.ArrivalTime}""
-            }}";
-
-            var serializedData = JsonConvert.SerializeObject(_flightData);
-
-            return Ok(serializedData);
+        [Route("flights/{id}")]
+        [HttpDelete]
+        public IActionResult DeleteFlights(int id)
+        {
+            lock (_lockObject)
+            {
+                _flightStorage.DeleteFlight(id);
+                return Ok(id);
+            }
         }
     }
 }
