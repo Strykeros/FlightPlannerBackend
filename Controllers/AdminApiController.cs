@@ -1,4 +1,5 @@
-﻿using FlightPlannerBackend.Logic;
+﻿using FlightPlannerBackend.Exceptions;
+using FlightPlannerBackend.Logic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,22 +43,20 @@ namespace FlightPlannerBackend.Controllers
         {
             lock (_lockObject)
             {
-                int flightAdded = _flightStorage.AddFlight(flight);
-
-                if (flightAdded == 201)
+                try
                 {
-                    return Created("flight added", _flightStorage.GetFlight(flight.Id)); 
+                    _flightStorage.AddFlight(flight);
                 }
-                else if (flightAdded == 409)
-                {
-                    return Conflict();
-                }
-                else if (flightAdded == 400)
+                catch (BadRequestException)
                 {
                     return BadRequest();
                 }
+                catch(ConflictException)
+                {
+                    return Conflict();
+                }
 
-                return Ok(flightAdded); 
+                return Created("", flight); 
             }
 
         }

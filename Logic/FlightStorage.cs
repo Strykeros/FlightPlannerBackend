@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FlightPlannerBackend.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlightPlannerBackend.Logic
 {
@@ -11,12 +12,7 @@ namespace FlightPlannerBackend.Logic
             _context = context;
         }
 
-        public int AddFlight(Flight flight)
-        {
-            return InsertFlight(flight);
-        }
-
-        private int InsertFlight(Flight flight)
+        public void AddFlight(Flight flight)
         {
             bool flightIsNull = string.IsNullOrEmpty(flight.ArrivalTime) ||
                                 string.IsNullOrEmpty(flight.DepartureTime) ||
@@ -47,17 +43,17 @@ namespace FlightPlannerBackend.Logic
 
             if (flight.From.AirportName.ToLower().Trim() == flight.To.AirportName.ToLower().Trim() || flightIsNull || dateMismatch)
             {
-                return 400;
+                throw new BadRequestException();
             }
 
             if (flightExists)
             {
-                return 409;
+                throw new ConflictException();
             }
 
             _context.Flights.Add(flight);
             _context.SaveChanges();
-            return 201;
+
         }
 
         public Flight GetFlight(int id)
@@ -72,7 +68,7 @@ namespace FlightPlannerBackend.Logic
 
         public void ClearFlights()
         {
-            if(_context.Flights.Any())
+            if (_context.Flights.Any())
             {
                 _context.Flights.RemoveRange(_context.Flights);
                 _context.SaveChanges();
@@ -83,14 +79,14 @@ namespace FlightPlannerBackend.Logic
         {
             var flight = _context.Flights.Include(f => f.From).Include(f => f.To).SingleOrDefault(f => f.Id == id);
 
-            if(flight != null)
+            if (flight != null)
             {
                 _context.Flights.Remove(flight);
                 _context.SaveChanges();
             }
         }
 
-        public Flight SearchAirport(string search)
+        public Flight? SearchAirport(string search)
         {
             var foundAirports = GetAllFlights()
             .FirstOrDefault(airport =>
