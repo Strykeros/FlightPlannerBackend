@@ -1,4 +1,6 @@
-﻿namespace FlightPlannerBackend.Logic
+﻿using FlightPlanner.Core.Models;
+
+namespace FlightPlanner.Core
 {
     public class FlightResponse
     {

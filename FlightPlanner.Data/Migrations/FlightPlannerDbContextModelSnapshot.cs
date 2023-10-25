@@ -3,27 +3,25 @@ using FlightPlannerBackend.Logic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FlightPlannerBackend.Migrations
+namespace FlightPlanner.Data.Migrations
 {
     [DbContext(typeof(FlightPlannerDbContext))]
-    [Migration("20230929222342_Init")]
-    partial class Init
+    partial class FlightPlannerDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.22")
+                .HasAnnotation("ProductVersion", "6.0.23")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("FlightPlannerBackend.Logic.Airport", b =>
+            modelBuilder.Entity("FlightPlanner.Core.Models.Airport", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -48,7 +46,7 @@ namespace FlightPlannerBackend.Migrations
                     b.ToTable("Airports");
                 });
 
-            modelBuilder.Entity("FlightPlannerBackend.Logic.Flight", b =>
+            modelBuilder.Entity("FlightPlanner.Core.Models.Flight", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -83,15 +81,15 @@ namespace FlightPlannerBackend.Migrations
                     b.ToTable("Flights");
                 });
 
-            modelBuilder.Entity("FlightPlannerBackend.Logic.Flight", b =>
+            modelBuilder.Entity("FlightPlanner.Core.Models.Flight", b =>
                 {
-                    b.HasOne("FlightPlannerBackend.Logic.Airport", "From")
+                    b.HasOne("FlightPlanner.Core.Models.Airport", "From")
                         .WithMany()
                         .HasForeignKey("FromId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("FlightPlannerBackend.Logic.Airport", "To")
+                    b.HasOne("FlightPlanner.Core.Models.Airport", "To")
                         .WithMany()
                         .HasForeignKey("ToId")
                         .OnDelete(DeleteBehavior.Cascade)

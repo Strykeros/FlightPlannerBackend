@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿
+using System.Text.Json.Serialization;
 
-namespace FlightPlannerBackend.Logic
+namespace FlightPlanner.Core.Models
 {
-    public class Airport
+    public class Airport : Entity
     {
         [JsonIgnore]
-        public int Id { get; set; }
+        public override int Id { get; set; }
         public string Country { get; set; }
         public string City { get; set; }
         [JsonPropertyName("airport")]
